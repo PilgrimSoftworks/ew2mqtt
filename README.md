@@ -1,5 +1,14 @@
 # ew2mqtt
 
+[![CI](https://github.com/PilgrimSoftworks/ew2mqtt/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/PilgrimSoftworks/ew2mqtt/actions/workflows/ci.yml)
+[![Release](https://github.com/PilgrimSoftworks/ew2mqtt/actions/workflows/release.yml/badge.svg)](https://github.com/PilgrimSoftworks/ew2mqtt/actions/workflows/release.yml)
+[![Latest release](https://img.shields.io/github/v/release/PilgrimSoftworks/ew2mqtt?logo=github&sort=semver)](https://github.com/PilgrimSoftworks/ew2mqtt/releases/latest)
+[![NuGet — Pilgrim.EasyWorship](https://img.shields.io/nuget/v/Pilgrim.EasyWorship?logo=nuget&label=Pilgrim.EasyWorship)](https://www.nuget.org/packages/Pilgrim.EasyWorship)
+[![NuGet — Pilgrim.EasyWorship.Discovery](https://img.shields.io/nuget/v/Pilgrim.EasyWorship.Discovery?logo=nuget&label=Pilgrim.EasyWorship.Discovery)](https://www.nuget.org/packages/Pilgrim.EasyWorship.Discovery)
+[![Container](https://img.shields.io/badge/ghcr.io-ew2mqtt-2496ED?logo=docker&logoColor=white)](https://github.com/PilgrimSoftworks/ew2mqtt/pkgs/container/ew2mqtt)
+[![.NET](https://img.shields.io/badge/.NET-8.0%20%7C%2010.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 A cross-platform .NET 10 service that bridges [EasyWorship](https://www.easyworship.com)'s
 undocumented `ezwremote` TCP API to MQTT. State changes (slide number, presentation
 number, overlays) are published as retained MQTT topics, and a parallel command topic
