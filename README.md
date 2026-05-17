@@ -235,6 +235,50 @@ client.StatusReceived += (_, ev) => Console.WriteLine($"slide {ev.SlideNo}");
 await client.StartAsync();
 ```
 
+### Autodiscovery
+
+Add **`Pilgrim.EasyWorship.Discovery`** to find the instance via mDNS instead of
+hardcoding `Host`/`Port`. `AddEasyWorshipDiscovery()` registers an
+`IEasyWorshipDiscovery` that transparently falls back across Bonjour `dns-sd`,
+the managed Zeroconf resolver, and a same-machine process/port probe.
+
+```csharp
+using Pilgrim.EasyWorship;
+using Pilgrim.EasyWorship.Discovery;
+using Microsoft.Extensions.DependencyInjection;
+
+// 1. Locate the EasyWorship ezwremote service on the LAN.
+var discoveryServices = new ServiceCollection();
+discoveryServices.AddLogging();
+discoveryServices.AddEasyWorshipDiscovery();
+await using var discoverySp = discoveryServices.BuildServiceProvider();
+
+var discovery = discoverySp.GetRequiredService<IEasyWorshipDiscovery>();
+EasyWorshipEndpoint? endpoint = await discovery.ResolveOnceAsync(TimeSpan.FromSeconds(5));
+if (endpoint is null)
+    throw new InvalidOperationException("No EasyWorship ezwremote service found.");
+
+Console.WriteLine($"Found {endpoint.InstanceName} at {endpoint.Host}:{endpoint.Port}");
+
+// 2. Point the client at the discovered host:port.
+var services = new ServiceCollection();
+services.AddLogging();
+services.AddEasyWorshipClient(o =>
+{
+    o.Host = endpoint.Host;
+    o.Port = endpoint.Port;
+    o.Uid  = "your-stable-guid";
+});
+
+await using var sp = services.BuildServiceProvider();
+var client = sp.GetRequiredService<IEasyWorshipClient>();
+client.StatusReceived += (_, ev) => Console.WriteLine($"slide {ev.SlideNo}");
+await client.StartAsync();
+```
+
+To enumerate every instance on the network (e.g. multiple machines), stream
+`discovery.BrowseAsync(TimeSpan.FromSeconds(5))` instead of `ResolveOnceAsync`.
+
 ## Building from source
 
 Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download).
