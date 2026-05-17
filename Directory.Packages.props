@@ -29,6 +29,7 @@
 
   <ItemGroup Label="Build / source link">
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.107" />
+    <PackageVersion Include="MinVer" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup Label="Testing">

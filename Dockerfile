@@ -17,7 +17,7 @@ RUN case "$TARGETARCH" in \
     esac && \
     dotnet publish src/Pilgrim.EasyWorship.Mqtt -c Release -r $RID \
         -p:PublishSingleFile=true -p:SelfContained=true -p:PublishTrimmed=true \
-        -p:DebugType=embedded -p:Version=$VERSION \
+        -p:DebugType=embedded -p:MinVerSkip=true -p:Version=$VERSION \
         -o /app
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-noble-chiseled AS runtime

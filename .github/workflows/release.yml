@@ -22,20 +22,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
 
-      - name: Compute version
-        id: ver
-        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
-
       - name: Pack libraries
         run: |
-          dotnet pack src/Pilgrim.EasyWorship -c Release \
-            -p:PackageVersion=${{ steps.ver.outputs.version }} -o nupkgs
-          dotnet pack src/Pilgrim.EasyWorship.Discovery -c Release \
-            -p:PackageVersion=${{ steps.ver.outputs.version }} -o nupkgs
+          dotnet pack src/Pilgrim.EasyWorship -c Release -o nupkgs
+          dotnet pack src/Pilgrim.EasyWorship.Discovery -c Release -o nupkgs
 
       - name: Push to nuget.org
         run: dotnet nuget push "nupkgs/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
@@ -60,6 +56,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
@@ -74,7 +72,7 @@ jobs:
         run: |
           dotnet publish src/Pilgrim.EasyWorship.Mqtt -c Release -r ${{ matrix.rid }} \
             -p:PublishSingleFile=true -p:SelfContained=true -p:PublishTrimmed=true \
-            -p:DebugType=embedded -p:Version=${{ steps.ver.outputs.version }} \
+            -p:DebugType=embedded \
             -o publish/${{ matrix.rid }}
 
       - name: Archive (tar.gz)
