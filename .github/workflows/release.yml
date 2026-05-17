@@ -1,0 +1,145 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  test:
+    uses: ./.github/workflows/ci.yml
+
+  pack:
+    name: NuGet pack & push
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Compute version
+        id: ver
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Pack libraries
+        run: |
+          dotnet pack src/Pilgrim.EasyWorship -c Release \
+            -p:PackageVersion=${{ steps.ver.outputs.version }} -o nupkgs
+          dotnet pack src/Pilgrim.EasyWorship.Discovery -c Release \
+            -p:PackageVersion=${{ steps.ver.outputs.version }} -o nupkgs
+
+      - name: Push to nuget.org
+        run: dotnet nuget push "nupkgs/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nupkgs
+          path: nupkgs/
+
+  binaries:
+    name: Binaries (${{ matrix.rid }})
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,  rid: linux-x64,    archive: tar.gz }
+          - { os: ubuntu-latest,  rid: linux-arm64,  archive: tar.gz }
+          - { os: macos-14,       rid: osx-x64,      archive: tar.gz }
+          - { os: macos-14,       rid: osx-arm64,    archive: tar.gz }
+          - { os: windows-latest, rid: win-x64,      archive: zip }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Compute version
+        id: ver
+        shell: bash
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish self-contained
+        shell: bash
+        run: |
+          dotnet publish src/Pilgrim.EasyWorship.Mqtt -c Release -r ${{ matrix.rid }} \
+            -p:PublishSingleFile=true -p:SelfContained=true -p:PublishTrimmed=true \
+            -p:DebugType=embedded -p:Version=${{ steps.ver.outputs.version }} \
+            -o publish/${{ matrix.rid }}
+
+      - name: Archive (tar.gz)
+        if: matrix.archive == 'tar.gz'
+        shell: bash
+        run: tar -C publish/${{ matrix.rid }} -czf ew2mqtt-${{ steps.ver.outputs.version }}-${{ matrix.rid }}.tar.gz .
+
+      - name: Archive (zip)
+        if: matrix.archive == 'zip'
+        shell: pwsh
+        run: Compress-Archive -Path publish/${{ matrix.rid }}/* -DestinationPath ew2mqtt-${{ steps.ver.outputs.version }}-${{ matrix.rid }}.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.rid }}
+          path: ew2mqtt-*
+
+  github-release:
+    name: GitHub Release
+    needs: [pack, binaries]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Compute checksums
+        run: |
+          mkdir release
+          find artifacts -type f \( -name '*.tar.gz' -o -name '*.zip' \) -exec cp {} release/ \;
+          cd release && sha256sum * > SHA256SUMS
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+
+  docker:
+    name: Multi-arch Docker image
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute version
+        id: ver
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/pilgrimsoftworks/ew2mqtt:${{ steps.ver.outputs.version }}
+            ghcr.io/pilgrimsoftworks/ew2mqtt:latest
+          build-args: VERSION=${{ steps.ver.outputs.version }}

@@ -1,0 +1,34 @@
+[Unit]
+Description=ew2mqtt — EasyWorship to MQTT bridge
+Documentation=https://github.com/PilgrimSoftworks/ew2mqtt
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+User=ew2mqtt
+Group=ew2mqtt
+ExecStart=/usr/local/bin/ew2mqtt
+EnvironmentFile=-/etc/ew2mqtt/ew2mqtt.env
+WorkingDirectory=/var/lib/ew2mqtt
+StateDirectory=ew2mqtt
+Restart=on-failure
+RestartSec=5
+WatchdogSec=60
+
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/ew2mqtt
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_NETLINK
+RestrictNamespaces=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

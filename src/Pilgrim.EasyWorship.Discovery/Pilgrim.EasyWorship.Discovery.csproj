@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework></TargetFramework>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <RootNamespace>Pilgrim.EasyWorship.Discovery</RootNamespace>
+    <AssemblyName>Pilgrim.EasyWorship.Discovery</AssemblyName>
+    <PackageId>Pilgrim.EasyWorship.Discovery</PackageId>
+    <IsPackable>true</IsPackable>
+    <Description>mDNS-based discovery for EasyWorship "ezwremote" services. Companion package to Pilgrim.EasyWorship. Not affiliated with or endorsed by Softouch Development, Inc.; "EasyWorship" is their trademark, used here only to describe interoperability.</Description>
+    <PackageTags>easyworship;ezwremote;mdns;zeroconf;bonjour</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pilgrim.EasyWorship\Pilgrim.EasyWorship.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Zeroconf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

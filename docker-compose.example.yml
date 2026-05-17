@@ -1,0 +1,19 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    network_mode: host
+    command: mosquitto -c /mosquitto-no-auth.conf
+    restart: unless-stopped
+
+  ew2mqtt:
+    image: ghcr.io/pilgrimsoftworks/ew2mqtt:latest
+    # host networking is required for mDNS discovery to reach the EasyWorship machine.
+    network_mode: host
+    environment:
+      Ew2Mqtt__Mqtt__Server: mqtt://localhost:1883
+      Ew2Mqtt__EasyWorship__DiscoveryMode: AutoThenManual
+      # Set Ew2Mqtt__EasyWorship__Host=10.0.0.5 to skip discovery
+      # Ew2Mqtt__EasyWorship__Host: 10.0.0.5
+    restart: unless-stopped
+    depends_on:
+      - mosquitto

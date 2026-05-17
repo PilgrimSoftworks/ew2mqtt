@@ -1,0 +1,42 @@
+## .NET
+bin/
+obj/
+out/
+publish/
+*.user
+*.suo
+*.userprefs
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+artifacts/
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+*.received.*
+*.snupkg
+*.nupkg
+nupkgs/
+*.binlog
+
+## IDE
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Tooling
+.tools/
+
+## Local secrets
+*.local.json
+appsettings.Development.json

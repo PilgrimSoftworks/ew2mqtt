@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Pilgrim.EasyWorship.Discovery/Pilgrim.EasyWorship.Discovery.csproj" />
+    <Project Path="src/Pilgrim.EasyWorship/Pilgrim.EasyWorship.csproj" />
+    <Project Path="src/Pilgrim.EasyWorship.Mqtt/Pilgrim.EasyWorship.Mqtt.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Pilgrim.EasyWorship.Discovery.Tests/Pilgrim.EasyWorship.Discovery.Tests.csproj" />
+    <Project Path="tests/Pilgrim.EasyWorship.Tests/Pilgrim.EasyWorship.Tests.csproj" />
+    <Project Path="tests/Pilgrim.EasyWorship.Mqtt.Tests/Pilgrim.EasyWorship.Mqtt.Tests.csproj" />
+  </Folder>
+</Solution>
